@@ -86,7 +86,7 @@ void crossover(GENE *o2,int group)
 	memset(crossovered[group], 0, MAXnum*sizeof(int));
 	selected = nelite_size;
 	operation_num = selected / 2;
-	interval = CrossoverRange;
+	interval = CrossoverRange[group];
 	map = map_allocator(selected);
 
 	for (j = 0; j < operation_num; j++)

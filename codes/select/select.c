@@ -24,13 +24,6 @@ static int ** tournament_allocator(void)	//为竞技场申请内存空间	tourna
 	return temp;
 }
 
-void swap(int *a, int *b)	//交换数组元素
-{
-	int temp = *a;
-	*a = *b;
-	*b = temp;
-}
-
 void init_random_pair(GENE *initgen)	//随机染色体对的初始化 initgen.gene[Job]={0，0，1，1，...，Element-1，...}
 {
 	int i,j,k;
@@ -38,6 +31,14 @@ void init_random_pair(GENE *initgen)	//随机染色体对的初始化 initgen.ge
 	for (i = 0; i < Element; i++)
 		for (j = 0; j < Machine && data[i][j].line != -1; j++)
 			(*initgen).gene[k++] = i;
+}
+
+static void swap(int *a, int *b)	//交换两个元素（int []）
+{
+	int temp;
+	temp = *a;
+	*a = *b;
+	*b = temp;
 }
 
 void tournament_generate(int **tournament)//生成竞技场，内容为对下标的映射
@@ -61,10 +62,6 @@ void randomize(GENE * pair)	//随机化染色体对
 		(*pair).gene[i] = (*pair).gene[k];
 		(*pair).gene[k] = temp;
 	}
-	//	swap(&(*pair).gene[i], &(*pair).gene[rand()%i]);
-	//int temp = *a;
-	//*a = *b;
-	//*b = temp;
 }
 
 void select(GENE ***o1, GENE ***o2)//select(&offspring_eselect,&offspring_tselect,index_of_island)
@@ -74,13 +71,10 @@ void select(GENE ***o1, GENE ***o2)//select(&offspring_eselect,&offspring_tselec
 	int **tournament = NULL;	//竞技场 tournament[ISLAND][index of offsprings]
 	static int o1_size[ISLAND], o2_size[ISLAND];	//o1与o2的种群规模
 	static int first = 1;	//记录函数是否为初次运行
-	//int TournamentRange = (int)(((double)RAND_MAX)*TRANGE)*(1.0 - 1.0 / (2.0 * (clock() / 750) + 6.0));
-	//static int num_random_generate;
 
 	if (first)	//首次运行时进行各项初始化
 	{
 		first = 0;
-		//num_random_generate = MAXnum - elite_size - TSIZE * max_operate_num;
 		for (i = 0; i < TSIZE; i++)
 			init_random_pair(&(random_pair[i]));
 		for (i = 0; i < ISLAND; i++)
@@ -120,32 +114,21 @@ void select(GENE ***o1, GENE ***o2)//select(&offspring_eselect,&offspring_tselec
 	for (i = 0; i < ISLAND; i++)
 		for (j = max_operate_num; j < nelite_size; j++)
 		{
-			/*
-			int find = 0;
-			while (find++<10)
-			{
-				randomize(&random_pair[0]);
-				decode(&random_pair[0]);
-				if (random_pair[0].makespan <= (int)(island[0][0].makespan*1.1))
-					break;
-			}
-			(*o2)[i][j] = random_pair[0];
-			*/
 
 			int min;
 			int find = 0;
-		here:		for (k = 0; k < TSIZE; k++)	//随机生成染色体，补充到种群中
-		{
-			randomize(&random_pair[k]);
-			decode(&random_pair[k]);
-		}
-		//if (clock() / 1000.0 < 250)
-		{
-			min = random_pair[0].makespan <= random_pair[1].makespan ? random_pair[0].makespan : random_pair[1].makespan;
-			find++;
-			if (min > (int)(island[0][0].makespan*1.15) && find < 5)	//控制解的质量
-				goto here;
-		}
+			do
+			{
+				for (k = 0; k < TSIZE; k++)	//随机生成染色体，补充到种群中
+				{
+					randomize(&random_pair[k]);
+					decode(&random_pair[k]);
+				}
+
+				min = random_pair[0].makespan <= random_pair[1].makespan ? random_pair[0].makespan : random_pair[1].makespan;
+				find++;
+			} while (min > (int)(island[0][0].makespan*1.15) && find < 5);//控制解的质量
+
 		//if (rand() <= TournamentRange)
 		(*o2)[i][j] = random_pair[0].makespan <= random_pair[1].makespan ? random_pair[0] : random_pair[1];
 		//else
@@ -158,5 +141,4 @@ void select(GENE ***o1, GENE ***o2)//select(&offspring_eselect,&offspring_tselec
 	free(tournament);
 	tournament = NULL;
 	/**********TOURNAMENT SELECT END******************/
-
 }

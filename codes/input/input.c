@@ -22,10 +22,12 @@ static int choose(void)	//返回值:1代表文件输入，2代表键盘输入
 static DATA ** memory_allocator(int col, int row)
 {
 	DATA **temp = NULL;
+
 	temp = (DATA**)malloc((row+1) * sizeof(DATA*));
 	if (temp != NULL)
 		for (int i = 0; i < row+1; i++)
 			temp[i] = (DATA *)malloc((col+1) * sizeof(DATA));
+
 	return temp;
 }
 
@@ -36,6 +38,7 @@ void input(void)
 	char buffer = '\0';
 	int i;
 	len = ElementId = line = 0;
+
 	/***************input with file**********
 	if (choose() == 1)
 	{
@@ -47,6 +50,7 @@ void input(void)
 		}
 	}
 	*/
+
 	scanf("%d%d", &Element, &Machine);
 	data = memory_allocator(Machine, Element);
 
@@ -71,6 +75,7 @@ void input(void)
 		
 	}
 	*******/
+
 	while (ElementId < Element)
 	{
 		for (i = 0; i < Machine; i++)
@@ -79,22 +84,6 @@ void input(void)
 		data[ElementId][i].time = -1;
 		ElementId++;
 	}
-	//Job = len;
+
 	Job = Element * Machine;
 }
-
-/**********************TEST*******************
-int main(void)
-{
-	input();
-	return 0;
-}
-
-/*
-2
-3 3
-0 (7,0) (3,1) (15,2)
-1 (10,1) (17,0)
-2 (7,0) (22,1)
--1
-*/

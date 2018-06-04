@@ -4,30 +4,27 @@ DATA **data = NULL;//输入数据data[Element][Machine]
 GENE island[ISLAND][MAXnum];//2个岛屿
 PROCESS **Process = NULL;//使用二维数组存放解码出的设计图Process[Machine][Element]
 PROCESS **BestProcess = NULL;//存放最优的设计图BestProcess[Machine][Element]
-GENE random_pair[TSIZE];
-GENE **offspring_tselect = NULL;
-GENE **offspring_eselect = NULL;
-//int after_select[ISLAND][MAXnum];//选择后基因的映射after_select[island][index of the selected],当after_selected[i][j]=-1时,表示已经进行过基因操作或是未选择
+GENE random_pair[TSIZE];//生成的随机基因对
+GENE **offspring_tselect = NULL;//锦标赛选择出的子代
+GENE **offspring_eselect = NULL;//精英选择出的子代
 int Element;//需加工的工件总数
 int Machine;//机器总数
 int Job;//总操作数，也就是基因的实际长度
 int age;//当前进化代数
-int MutantRange = (int)(((double)RAND_MAX)*MUTATION);//当rand()的值在[0,MutantRange]时发生突变
-int CrossoverRange = (int)(((double)RAND_MAX)*CROSS);//当rand()的值在[0,CrossoverRange]时发生交叉
-int TournamentRange = (int)(((double)RAND_MAX)*TRANGE);
-int elite_size = (int)(ELITE*(double)MAXnum) >= 1 ? (int)(ELITE*(double)MAXnum) : 1;
-//int elite_size = 0;
-int nelite_size = MAXnum - (int)(ELITE*(double)MAXnum);
-int max_operate_num = (MAXnum - (int)(ELITE*(double)MAXnum)) / TSIZE;
-int crossovered[ISLAND][MAXnum] = { -1 };
+int MutantRange[ISLAND] = { (int)(((double)RAND_MAX)*MUTATION_1),(int)(((double)RAND_MAX)*MUTATION_2) };//当rand()的值在[0,MutantRange]时发生突变
+int CrossoverRange[ISLAND] = { (int)(((double)RAND_MAX)*CROSS_1), (int)(((double)RAND_MAX)*CROSS_2) };//当rand()的值在[0,CrossoverRange]时发生交叉
+int TournamentRange = (int)(((double)RAND_MAX)*TRANGE);//发生锦标赛选择的区间
+int elite_size = (int)(ELITE*(double)MAXnum) >= 1 ? (int)(ELITE*(double)MAXnum) : 1;//精英数量
+int nelite_size = MAXnum - (int)(ELITE*(double)MAXnum);//非精英数量
+int max_operate_num = (MAXnum - (int)(ELITE*(double)MAXnum)) / TSIZE;//最大锦标赛选择数
+int crossovered[ISLAND][MAXnum] = { -1 };//发生过交叉的个体（0代表没有交叉，1代表交叉）
 double Sum_fitness[2];//岛屿中所有个体适应度的和
 int BestMakeSpan = 99999;//最优解的最长完工时间
-
 
 int main(void)
 {
 	int i, j;
-	/**************************
+	/***********WORK FLOW***************
 	*	input();		//输入
 	*	initGen();		//生成初始种群
 	*	decode();		//解码
@@ -45,6 +42,7 @@ int main(void)
 	*	//animate();
 	*	return 0;
 	*/
+
 	srand((unsigned int)time(NULL));
 	input();
 	InitGen();
@@ -88,19 +86,26 @@ int main(void)
 		if (age%MOVEage == 0)
 			move();
 
-		if (age%100==0)
+		if (age % 100 == 0)	//重设种子
 			srand((unsigned int)time(NULL));
 
-		//printf("age:%d\tisland1.makespan:%d\tisland2.makespan:%d\tBestMakeSpan:%d", age, island[0][0].makespan, island[1][0].makespan, BestMakeSpan);
-		//printf("Time %.3f\n", (double)clock() / 1000);
+		/**********************debug*******************/
+
+		printf("age:%d\tisland1.makespan:%d\tisland2.makespan:%d\tBestMakeSpan:%d", age, island[0][0].makespan, island[1][0].makespan, BestMakeSpan);
+		printf("Time %.3f\n", (double)clock() / 1000);
+
+		/**********************************************/
+
 		age++;
 	}
-	/************dbg**************
+	/************debug**************
+
 	int sum_time = 0;
 	for (int i = 0; i < ISLAND; i++)
 		for (int j = 0; j < MAXnum; j++)
 			sum_time += island[i][j].makespan;
 	printf("%lf\n", (double)sum_time / ISLAND / MAXnum);
+
 	*/
 
 	output();
@@ -108,17 +113,22 @@ int main(void)
 
 	for (int i = 0; i < Machine + 1; i++)
 		free(Process[i]);
-	free(Process); 
+	free(Process);
+
 	for (int i = 0; i < Machine + 1; i++)
 		free(BestProcess[i]);
 	free(BestProcess);
+
 	free(temporary);
+
 	for (int i = 0; i < Element + 1; i++)
 		free(data[i]);
 	free(data);
+
 	for (int i = 0; i < ISLAND; i++)
 		free(offspring_eselect[i]);
 	free(offspring_eselect);
+
 	for (int i = 0; i < ISLAND; i++)
 		free(offspring_tselect[i]);
 	free(offspring_tselect);
@@ -127,7 +137,7 @@ int main(void)
 	return 0;
 }
 
-/*
+/***************TEST DATA****************
 3 3
 0 7 1 3 2 15
 2 1 1 10 0 17

@@ -33,7 +33,7 @@ void mutant(GENE *o2, int group)
 	//qsort_after_select();
 	pos1 = pos2 = temp = 0;
 	map_len = mutant_map[0];
-	interval = MutantRange;
+	interval = MutantRange[group];
 
 	for (int i = 1; i < map_len; i++)
 	{
